@@ -1,35 +1,23 @@
-# Use the Node.js image as the base image
-FROM node:alpine AS builder
+# Use an official Node runtime as the base image
+FROM node:20-alpine
 
-# Set the working directory inside the container
-WORKDIR /usr/src/app
+# Set the working directory in the container
+WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
-COPY package.json package-lock.json ./
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
-# Copy all project files to the working directory
+# Copy the rest of the application code
 COPY . .
 
-# Install Vite globally or run commands directly using npx
-RUN npm install -g vite
-
-# Build your application (replace with your build command)
+# Build the application
 RUN npm run build
 
-# Use a minimal production image
-FROM node:alpine
-
-WORKDIR /usr/src/app
-
-COPY --from=builder /usr/src/app/dist ./dist
-COPY package.json package-lock.json ./
-RUN npm install --only=production
-
-# Expose the port your app is running on (if needed)
+# Expose the port the app runs on
 EXPOSE 5173
 
-# Start the app in development mode
+# Command to run the application
 CMD ["npm", "run", "dev"]
